@@ -3,6 +3,7 @@
 ## Learning Objectives
 
 By completing these exercises, you will:
+
 - ✅ Create Redis client wrapper
 - ✅ Build cache service
 - ✅ Integrate Redis with Express
@@ -13,12 +14,14 @@ By completing these exercises, you will:
 ## Before You Start
 
 **Prerequisites:**
+
 - Redis basics (Level 2)
 - Express.js knowledge
 - Understanding of caching patterns
 - Redis running
 
 **Setup:**
+
 1. Navigate to `fs-course-caching/level-03-redis-integration/`
 2. Install: `pnpm add redis`
 3. Ensure Redis is running
@@ -37,14 +40,16 @@ By completing these exercises, you will:
 
 **Instructions:**
 Create `src/redis-client.ts`:
+
 1. Singleton pattern
 2. Connection management
 3. Error handling
 
 **Expected Code Structure:**
+
 ```typescript
 // src/redis-client.ts
-import { createClient } from 'redis';
+import { createClient } from "redis";
 
 class RedisClient {
   private static instance: RedisClient;
@@ -52,11 +57,11 @@ class RedisClient {
 
   private constructor() {
     this.client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
+      url: process.env.REDIS_URL || "redis://localhost:6379",
     });
 
-    this.client.on('error', (err) => {
-      console.error('Redis Client Error', err);
+    this.client.on("error", (err) => {
+      console.error("Redis Client Error", err);
     });
   }
 
@@ -88,6 +93,7 @@ export default RedisClient.getInstance();
 ```
 
 **Verification:**
+
 - Client connects
 - Singleton works
 - Error handling works
@@ -102,14 +108,16 @@ export default RedisClient.getInstance();
 
 **Instructions:**
 Create `src/services/cache.service.ts`:
+
 1. Get, set, delete methods
 2. TTL support
 3. JSON serialization
 
 **Expected Code Structure:**
+
 ```typescript
 // src/services/cache.service.ts
-import redisClient from '../redis-client';
+import redisClient from "../redis-client";
 
 class CacheService {
   async get<T>(key: string): Promise<T | null> {
@@ -117,7 +125,7 @@ class CacheService {
       const value = await redisClient.getClient().get(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
-      console.error('Cache get error:', error);
+      console.error("Cache get error:", error);
       return null;
     }
   }
@@ -131,7 +139,7 @@ class CacheService {
         await redisClient.getClient().set(key, serialized);
       }
     } catch (error) {
-      console.error('Cache set error:', error);
+      console.error("Cache set error:", error);
     }
   }
 
@@ -144,6 +152,7 @@ export default new CacheService();
 ```
 
 **Verification:**
+
 - Cache service works
 - TTL works
 - Serialization works
@@ -158,25 +167,27 @@ export default new CacheService();
 
 **Instructions:**
 Create `src/middleware/cache.middleware.ts`:
+
 1. Cache API responses
 2. Cache database queries
 3. Handle cache misses
 
 **Expected Code Structure:**
+
 ```typescript
 // src/middleware/cache.middleware.ts
-import { Request, Response, NextFunction } from 'express';
-import cacheService from '../services/cache.service';
+import { Request, Response, NextFunction } from "express";
+import cacheService from "../services/cache.service";
 
 export function cacheMiddleware(ttlSeconds: number = 300) {
   return async (req: Request, res: Response, next: NextFunction) => {
     // Only cache GET requests
-    if (req.method !== 'GET') {
+    if (req.method !== "GET") {
       return next();
     }
 
     const cacheKey = `cache:${req.originalUrl}`;
-    
+
     // Try to get from cache
     const cached = await cacheService.get(cacheKey);
     if (cached) {
@@ -185,7 +196,7 @@ export function cacheMiddleware(ttlSeconds: number = 300) {
 
     // Store original json method
     const originalJson = res.json.bind(res);
-    
+
     // Override json to cache response
     res.json = function (body: any) {
       cacheService.set(cacheKey, body, ttlSeconds);
@@ -198,11 +209,13 @@ export function cacheMiddleware(ttlSeconds: number = 300) {
 ```
 
 **Usage:**
+
 ```typescript
-router.get('/users', cacheMiddleware(300), getUsers);
+router.get("/users", cacheMiddleware(300), getUsers);
 ```
 
 **Verification:**
+
 - Caching works
 - Cache hits return cached data
 - Cache misses fetch fresh data
@@ -260,11 +273,11 @@ main().catch(async (err) => {
 
 ## Verification Checklist
 
-- [ ] Redis client works
-- [ ] Cache service works
-- [ ] Middleware works
-- [ ] Caching improves performance
-- [ ] Error handling works
+- [x] Redis client works
+- [x] Cache service works
+- [x] Middleware works
+- [x] Caching improves performance
+- [x] Error handling works
 
 ## Next Steps
 
@@ -276,6 +289,7 @@ main().catch(async (err) => {
 ---
 
 **Key Takeaways:**
+
 - Use singleton for Redis client
 - Serialize data for storage
 - Set appropriate TTL
