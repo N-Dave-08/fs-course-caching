@@ -28,7 +28,7 @@ class RedisClient {
   }
 
   async disconnect(): Promise<void> {
-    if (!this.client.isOpen) {
+    if (this.client.isOpen) {
       await this.client.quit();
     }
   }
