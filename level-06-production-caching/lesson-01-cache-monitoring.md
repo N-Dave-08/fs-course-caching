@@ -14,6 +14,7 @@
 ## Learning Objectives
 
 By the end of this lesson, you will be able to:
+
 - Identify the most important cache metrics (hit rate, latency, memory, evictions)
 - Understand what “good” looks like and how to interpret changes over time
 - Instrument cache operations (hits/misses) at the application layer
@@ -23,6 +24,7 @@ By the end of this lesson, you will be able to:
 ## Why Cache Monitoring Matters
 
 Caching changes system behavior. Without monitoring, you won’t know if your cache is:
+
 - helping performance
 - hiding bugs with stale data
 - causing outages via stampedes or evictions
@@ -30,10 +32,13 @@ Caching changes system behavior. Without monitoring, you won’t know if your ca
 Monitoring turns caching from guesswork into an engineering tool.
 
 ```mermaid
-flowchart LR
-  cache[Cache] --> metrics[Metrics]
-  metrics --> dashboard[Dashboards]
-  dashboard --> decisions[TTLKeysCapacityDecisions]
+flowchart TD
+  A[(Cache)] -- telemetry --> B{Metrics Engine}
+  B --> C[Visual Dashboards]
+  C --> D[Capacity Decisions]
+
+  style A fill:#f9f,stroke:#333,stroke-width:2px
+  style D fill:#bbf,stroke:#333,stroke-width:2px
 ```
 
 ## Key Metrics (High Signal)
@@ -48,6 +53,7 @@ flowchart LR
 ### Interpreting hit rate
 
 High hit rate is not always “good”:
+
 - if invalidation is broken, you may be serving stale data efficiently
 
 Correctness first, then performance.
@@ -86,6 +92,7 @@ console.log(info);
 ```
 
 This can help you inspect:
+
 - command stats
 - keyspace stats
 - eviction behavior (depending on section)
@@ -93,11 +100,13 @@ This can help you inspect:
 ## Real-World Scenario: Eviction Storm
 
 If Redis starts evicting many keys:
+
 - hit rate may drop
 - DB load spikes
 - latency increases
 
 Monitoring evictions early lets you:
+
 - increase memory
 - reduce cached key volume
 - shorten TTLs for low-value keys
@@ -141,9 +150,11 @@ Overall hit rate can hide that one critical endpoint has poor cache performance.
 ### Issue: Hit rate is high but users complain about stale data
 
 **Symptoms:**
+
 - “I updated but still see old values”
 
 **Solutions:**
+
 1. Add event-based invalidation on write paths.
 2. Reduce TTL while fixing invalidation.
 3. Add tests for stale-read regressions.
@@ -178,6 +189,7 @@ Now that you can monitor caches:
 ---
 
 **Key Takeaways:**
+
 - Monitor hit rate, latency, memory usage, evictions, and errors to operate caches safely.
 - High hit rate is useless if invalidation is wrong—correctness comes first.
 - Evictions and timeouts are early warning signals of cache-related incidents.
